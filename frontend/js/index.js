@@ -1,4 +1,51 @@
 
+
+document.addEventListener('DOMContentLoaded', () => {
+    const formLogin = document.getElementById('formLogin');
+    const mensaje = document.getElementById('divMensaje');
+
+    //Verificamos que el formulario exista en el HTML
+    if(formLogin){
+        //2. Escuchamos estrictamente el evento SUBMIT del formulario
+        formLogin.addEventListener('submit', async(e) => { //Espera información de la base de datos
+            //3. Evitamos que la página se recargue
+            e.preventDefault();
+
+            const usuario = document.getElementById('txtUsuario').value.trim();
+            const password = document.getElementById('txtPassword').value.trim();
+
+            //Comprobación dinamica en Fronted (Ahorra peticiones innecesarias)
+            if (usuario === "" || password === ""){
+                mensaje.textContent = "Por favor, llena todos los campos."
+                return;
+            }
+
+            mensaje.textContent = "Procesando...";
+
+            try {
+                const respuesta = await fetch('../../backend/api/login-proceso.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ usuario, password })
+                })
+
+                const datos = await respuesta.json();
+
+                if (datos.status === 'success') {
+                    //El servidor nos dice a donde redirigir segun el rol
+                    window.location.href = datos.redirect;
+                } else {
+                    mensaje.textContent = datos.message;
+                }
+
+            } catch (error) {
+                mensaje.textContent = "Error al conectar con el servidor.";
+            }
+        });
+    }
+});
+
+/*
     document.getElementById('formLogin').addEventListener('submit', async (e) =>{
         e.preventDefault();//Detener el envio tradicional de HTML
 
@@ -33,5 +80,5 @@
         } catch (error) {
             mensaje.textContent = "Error al conectar con el servidor.";
         }
-    });
+    });*/
 
